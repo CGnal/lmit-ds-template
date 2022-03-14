@@ -1,0 +1,84 @@
+name: CD - Create a Release on Github
+
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+     - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  autorelease:
+    name: Create Release
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2.3.4
+
+      - name: Setup Python
+        uses: actions/setup-python@v2.2.2
+        with:
+          python-version: '{{PYTHON_VERSION}}'
+
+      - name: Build source and binary distributions
+        shell: bash -l {0}
+        run: |
+          python -m pip install build wheel
+          python setup.py sdist bdist_wheel
+
+      - name: Add version to environment vars
+        run: |
+          PROJECT_VERSION=$(python setup.py --version)
+          echo "PROJECT_VERSION=$PROJECT_VERSION" >> $GITHUB_ENV
+
+      - name: Check if tag version matches project version
+        run: |
+          TAG=$(git describe HEAD --tags --abbrev=0)
+          echo $TAG
+          echo $PROJECT_VERSION
+          if [[ "$TAG" != "v$PROJECT_VERSION" ]]; then exit 1; fi
+
+      - name: Check source package structure
+        run: |
+          tar -xzf $(ls -rt  dist/*.tar.gz | tail -1)
+          DIR=$(python setup.py --fullname)
+          rm -rf $(find . -name "*.pyc") $(find . -name "__pycache__")
+          files=(
+            "requirements/requirements.txt"
+            "LICENSE"
+            "MANIFEST.in"
+            "PKG-INFO"
+            "README.md"
+            "setup.cfg"
+            "setup.py"
+            "versioneer.py"
+          )
+          while IFS= read -d $'\0' -r file ; do
+            if [[ "${file}" =~ .*".py" ]]; then files=("${files[@]}" "$file"); fi;
+          done < <(find {{SRC}} -print0)
+
+          for file in "${files[@]}" ; do
+            if [ ! -f "${DIR}/${file}" ]; then echo "Missing ${file}"; exit 1; fi
+          done
+
+          rm -rf $DIR
+
+      - name: Check typing, linting and formatting
+        run: make checks
+
+      - name: Release Notes
+        uses: heinrichreimer/github-changelog-generator-action@v2.3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          output: ".github/RELEASE-TEMPLATE.md"
+
+      - name: Create Github Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          body_path: ".github/RELEASE-TEMPLATE.md"
+          files: |
+            dist/{{PROJECT_NAME}}-${{env.PROJECT_VERSION}}-py3-none-any.whl
+            dist/{{PROJECT_NAME}}-${{env.PROJECT_VERSION}}.tar.gz
+
+
