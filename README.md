@@ -114,3 +114,21 @@ setuptools.setup(
 )
 ```
  for full documentation [versioneer GitHub repo](https://github.com/python-versioneer/python-versioneer)
+
+## Terraform 
+
+In the `terraform` folder we collect the configurations to set up a GCP project for data science activities.
+In particular, the schema of the project created with these instructions is the following:
+![Functional Diagram](terraform/img/schema.png)
+
+The script `bin/terraform.sh` creates the instances and the service accounts with required permissions. The
+terraform state is stored in a GCS bucket whose name is always formed concatenating the project-id with the postfix `-terraform`.
+This bucket is automatically locked and encrypted and only project owners can access it.
+
+This script requires:
+* Terraform >= 0.12.4
+* Gcloud cli
+* To have already created a `Landing Zone v2` using [Spootnik](https://spootnik.adeo.cloud/execution-environment/cloudservices/new-landingzone) 
+with Adeo connection flag set to `Yes`and being the project owner on GCP
+* That the user that running the script is `LandingHub Network User` on the `lh-itlm` project-hub.
+

@@ -14,21 +14,20 @@ root_path="$(dirname "$0")/.."
 PYTHON_VERSION=$(python --version)
 PYTHON_VERSION="${PYTHON_VERSION#Python }"
 PYTHON_VERSION="${PYTHON_VERSION%.*}"
+SEP=", "
+SUPPORTED_VERSIONS="3.6, 3.7, 3.8, 3.9, "
 
-if [ ! -d "${root_path}/templates/${PYTHON_VERSION}" ];
+if [[ ! ${SUPPORTED_VERSIONS} =~ ${PYTHON_VERSION}${SEP} ]];
 then
   echo "Python ${PYTHON_VERSION} not supported"
   exit 0
 fi
 
-mkdir -p "${root_path}/requirements"
 mkdir -p "${root_path}/.github/workflows"
 
 # template_file_path:destination_file_path. File paths are relative to the project root
 templates=(
     "templates/setup.cfg.tmpl:setup.cfg"
-    "templates/${PYTHON_VERSION}/requirements.in:requirements/requirements.in"
-    "templates/${PYTHON_VERSION}/requirements_ci.in:requirements/requirements_ci.in"
     "templates/continous-delivery.yml.tmpl:.github/workflows/continous-delivery.yml"
     "templates/continous-integration.yml.tmpl:.github/workflows/continous-integration.yml"
     "templates/github-page-build-and-deploy.yml.tmpl:.github/workflows/github-page-build-and-deploy.yml"
@@ -38,6 +37,9 @@ templates=(
     "templates/Makefile.tmpl:Makefile"
     "templates/MANIFEST.in.tmpl:MANIFEST.in"
     "templates/.gitattributes.tmpl:.gitattributes"
+    "templates/terraform.sh.tmpl:bin/terraform.sh"
+    "templates/tf.backend.tmpl:terraform/tf.backend"
+    "templates/tf.variables.tmpl:terraform/tf.variables"
 )
 
 # placeholder in format placeholder:description
@@ -45,6 +47,7 @@ placeholders=(
     "PROJECT_NAME:Project name"
     "SRC:Source folder name"
     "PROJECT_DESCRIPTION:Project description"
+    "PROJECT_ID:Google Cloud Project ID"
 )
 
 user_values=()
