@@ -22,7 +22,6 @@ variable "NETWORK" {
 }
 
 variable "SUBNET" {
-  default = "https://www.googleapis.com/compute/v1/projects/lh-itlm/regions/europe-west1/subnetworks/lh-subnet-euw1-gfabbisogno"
 }
 
 variable "NODETYPE" {
@@ -46,5 +45,4 @@ variable "OS_IMAGE" {
 }
 
 variable "COMPUTESERVICEACCOUNT" {
-  default = "compute_engine"
 }

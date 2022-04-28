@@ -11,16 +11,16 @@ files := $(shell find . -name "*.py")
 doc_files := $(shell find sphinx -name "*.*")
 
 # Uncomment to store cache installation in the environment
-# package_dir := $(shell python -c 'import site; print(site.getsitepackages()[0])')
-package_dir := .make_cache
+# cache_dir := $(shell python -c 'import site; print(site.getsitepackages()[0])')
+cache_dir := .make_cache
 package_name=$(shell python -c "import configparser;config=configparser.ConfigParser();config.read('setup.cfg');print(config['metadata']['name'])")
 
-$(shell mkdir -p $(package_dir))
+$(shell mkdir -p $(cache_dir))
 
-pre_deps_tag := $(package_dir)/.pre_deps
-env_tag := $(package_dir)/.env_tag
-env_ci_tag := $(package_dir)/.env_ci_tag
-install_tag := $(package_dir)/.install_tag
+pre_deps_tag := $(cache_dir)/.pre_deps
+env_tag := $(cache_dir)/.env_tag
+env_ci_tag := $(cache_dir)/.env_ci_tag
+install_tag := $(cache_dir)/.install_tag
 
 # ======================
 # Rules and Dependencies
@@ -48,10 +48,12 @@ help:
 
 
 $(pre_deps_tag):
-	grep "^pip-tools\|^black"  requirements/requirements_ci.in | xargs ${PYTHON} -m pip install
+	@echo "==Installing pip-tools and black=="
+	grep "^pip-tools\|^black"  requirements/requirements_ci.in | xargs ${PYTHON} -m pip install --quiet
 	touch $(pre_deps_tag)
 
 requirements/requirements.txt: requirements/requirements_ci.txt
+	@echo "==Compiling requirements.txt=="
 	cat requirements/requirements.in > subset.in
 	echo "\n-c requirements/requirements_ci.txt" >> subset.in
 	pip-compile --output-file "requirements/requirements.txt" --quiet --no-emit-index-url subset.in
@@ -60,17 +62,20 @@ requirements/requirements.txt: requirements/requirements_ci.txt
 reqs: requirements/requirements.txt
 
 requirements/requirements_ci.txt: requirements/requirements_ci.in requirements/requirements.in $(pre_deps_tag)
+	@echo "==Compiling requirements_ci.txt=="
 	pip-compile --output-file requirements/requirements_ci.txt --quiet --no-emit-index-url requirements/requirements.in requirements/requirements_ci.in
 
 reqs_ci: requirements/requirements_ci.txt
 
 $(env_tag): requirements/requirements.txt
-	pip-sync requirements/requirements.txt
+	@echo "==Installing requirements.txt=="
+	pip-sync --quiet requirements/requirements.txt
 	rm -f $(env_ci_tag)
 	touch $(env_tag)
 
 $(env_ci_tag): requirements/requirements_ci.txt
-	pip-sync requirements/requirements_ci.txt
+	@echo "==Installing requirements_ci.txt=="
+	pip-sync --quiet requirements/requirements_ci.txt
 	rm -f $(env_tag)
 	touch $(env_ci_tag)
 
@@ -78,40 +83,48 @@ setup: $(env_tag)
 
 setup_ci: $(env_ci_tag)
 
-format: setup_ci
-	${PYTHON} -m black $(folders)
-
 dist/.build-tag: $(files) setup.cfg requirements/requirements.txt
-	${PYTHON} setup.py sdist
+	@echo "==Building package distribution=="
+	${PYTHON} setup.py --quiet sdist
 	ls -rt  dist/* | tail -1 > dist/.build-tag
 
 dist: dist/.build-tag setup.py
 
 $(install_tag): dist/.build-tag
-	${PYTHON} -m pip install $(shell ls -rt  dist/*.tar.gz | tail -1)
+	@echo "==Installing package=="
+	${PYTHON} -m pip install --quiet $(shell ls -rt  dist/*.tar.gz | tail -1)
 	touch $(install_tag)
 
+install: setup $(install_tag)
+
+install_dev: setup_ci $(install_tag)
+
 uninstall:
-	@echo "Uninstall package $(package_name)"
+	@echo "==Uninstall package $(package_name)=="
 	${PYTHON} -m pip uninstall -y $(package_name)
 	${PYTHON} -m pip freeze | grep -v "@" | xargs pip uninstall -y
 	rm -f $(env_tag) $(env_ci_tag) $(pre_deps_tag) $(install_tag)
 
-install: setup $(install_tag)
+format: install_dev
+	${PYTHON} -m black $(folders)
 
-tests: $(install_tag) setup_ci
-	${PYTHON} -m pytest
+mypy: install_dev
+	${PYTHON} -m mypy --install-types --non-interactive --follow-imports silent $(folders)
 
-mypy: $(install_tag) setup_ci
-	mypy --install-types --non-interactive --follow-imports silent $(folders)
+lint: install_dev
+	${PYTHON} -m flake8 $(folders)
 
-lint: setup_ci
-	flake8 $(folders)
+tests: install_dev
+	${PYTHON} -m pytest tests
 
-checks: format mypy lint tests
+checks: install_dev
+	${PYTHON} -m black $(folders)
+	${PYTHON} -m mypy --install-types --non-interactive --follow-imports silent $(folders)
+	${PYTHON} -m flake8 $(folders)
+	${PYTHON} -m pytest tests
 
-docs: setup_ci $(install_tag) $(doc_files) setup.cfg
-	sphinx-apidoc -f -o sphinx/source/api {{SRC}}
+docs: install_dev $(doc_files) setup.cfg
+	sphinx-apidoc -f -o sphinx/source/api catchecker
 	make --directory=sphinx --file=Makefile clean html
 
 clean: uninstall

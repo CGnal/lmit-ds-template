@@ -1,2 +1,0 @@
-bucket = "lmit-ds-3pcatcheck-dev-terraform"
-prefix = "terraform/state/gke/lmit-ds-3pCatChecker-dev-itlm"

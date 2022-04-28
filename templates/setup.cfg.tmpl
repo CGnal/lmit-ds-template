@@ -10,7 +10,7 @@ parentdir_prefix = {{PROJECT_NAME}}
 addopts = --doctest-modules --cov=./{{SRC}}
 
 [flake8]
-exclude = __init__.py,versioneer.py,{{SRC}}/_version.py
+exclude = versioneer.py,{{SRC}}/_version.py
 per-file-ignores =
     tests/*: D
 ignore =
@@ -86,3 +86,11 @@ exclude =
     dist*
     sphinx*
     docs*
+    dev*
+    scripts*
+    terraform*
+    confs*
+    data*
+    bin*
+    requirements*
+

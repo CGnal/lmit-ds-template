@@ -1,4 +1,4 @@
-resource "google_compute_address" "internal" {
+resource "google_compute_address" "internal_exec" {
   name         = "${var.INSTANCENAME}-int-ip"
   project      = var.PROJECT
   region       = var.REGION
@@ -20,22 +20,30 @@ resource "google_compute_instance" "default" {
       size = var.BOOT_SIZE
     }
   }
-  
+
   network_interface {
     network = var.NETWORK
     subnetwork = var.SUBNET
-    network_ip = google_compute_address.internal.address
+    network_ip = google_compute_address.internal_exec.address
   }
 
   service_account {
     email = var.COMPUTESERVICEACCOUNT
     scopes = ["cloud-platform"]
   }
-
 }
 
 
-resource "google_compute_instance" "default" {
+resource "google_compute_address" "internal_train" {
+  name         = "${var.TRAIN_INSTANCENAME}-int-ip"
+  project      = var.PROJECT
+  region       = var.REGION
+  address_type = "INTERNAL"
+  subnetwork   = var.SUBNET
+}
+
+
+resource "google_compute_instance" "default_train" {
   name         = var.TRAIN_INSTANCENAME
   machine_type = var.TRAIN_NODETYPE
   zone         = var.ZONE
@@ -52,12 +60,11 @@ resource "google_compute_instance" "default" {
   network_interface {
     network = var.NETWORK
     subnetwork = var.SUBNET
-    network_ip = google_compute_address.internal.address
+    network_ip = google_compute_address.internal_train.address
   }
 
   service_account {
     email = var.COMPUTESERVICEACCOUNT
     scopes = ["cloud-platform"]
   }
-
 }
