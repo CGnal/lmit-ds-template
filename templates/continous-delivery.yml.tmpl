@@ -63,6 +63,9 @@ jobs:
           rm -rf $DIR
 
       - name: Check typing, linting and formatting
+        eval `ssh-agent -s`
+        ssh-add - <<< '${{ secrets.CONNECTORS_TOKEN }}'
+        git config --global url."git@github.com:".insteadOf "https://github.com/"
         run: make checks
 
       - name: Release Notes

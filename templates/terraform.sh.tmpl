@@ -1,10 +1,13 @@
 #!/bin/bash
 
+root_path="$(dirname "$0")/.."
 gcloud auth login
 gcloud auth application-default login
 
-gcloud config set project {{PROJECT_ID}}
-gsutil mb -l europe-west1 gs://{{PROJECT_ID}}-terraform/
+cd "${root_path}/terraform"
+gcloud config set project lmit-ds-3pcatchecker-dev
+gsutil mb -l europe-west1 gs://lmit-ds-3pcatchecker-dev-terraform/
 terraform init -backend-config=tf.backend ### if required, do NOT copy the existing state
 terraform plan -var-file=tf.variables
 terraform apply -var-file=tf.variables
+cd "${root_path}"

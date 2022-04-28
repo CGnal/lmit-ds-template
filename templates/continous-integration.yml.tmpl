@@ -29,7 +29,13 @@ jobs:
           architecture: x64
 
       - name: Check typing, linting, formatting and run unit-tests
+        eval `ssh-agent -s`
+        ssh-add - <<< '${{ secrets.CONNECTORS_TOKEN }}'
+        git config --global url."git@github.com:".insteadOf "https://github.com/"
         run: make checks
 
       - name: Make documentation
+        eval `ssh-agent -s`
+        ssh-add - <<< '${{ secrets.CONNECTORS_TOKEN }}'
+        git config --global url."git@github.com:".insteadOf "https://github.com/"
         run: make docs

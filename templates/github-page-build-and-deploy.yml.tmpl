@@ -21,6 +21,9 @@ jobs:
           architecture: x64
 
       - name: Generate content
+        eval `ssh-agent -s`
+        ssh-add - <<< '${{ secrets.CONNECTORS_TOKEN }}'
+        git config --global url."git@github.com:".insteadOf "https://github.com/"
         run: make docs
 
       - name: Deploy Page
