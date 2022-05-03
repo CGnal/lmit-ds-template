@@ -1,0 +1,7 @@
+// vars are not allowed here
+terraform {
+  backend "gcs" {
+    bucket = "{{PROJECT_ID}}-terraform"
+    prefix = "terraform/state/ds/{{PROJECT_ID}}"
+  }
+}

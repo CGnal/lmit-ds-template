@@ -38,8 +38,9 @@ templates=(
     "templates/MANIFEST.in.tmpl:MANIFEST.in"
     "templates/.gitattributes.tmpl:.gitattributes"
     "templates/terraform.sh.tmpl:bin/terraform.sh"
-    "templates/tf.backend.tmpl:terraform/tf.backend"
-    "templates/tf.variables.tmpl:terraform/tf.variables"
+    "templates/backend.tf.tmpl:terraform/backend.tf"
+    "templates/vars.tf.tmpl:terraform/vars.tf"
+    "templates/google-client.tf.tmpl:terraform/google-client.tf"
 )
 
 # placeholder in format placeholder:description

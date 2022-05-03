@@ -5,9 +5,10 @@ gcloud auth login
 gcloud auth application-default login
 
 cd "${root_path}/terraform"
-gcloud config set project lmit-ds-3pcatchecker-dev
-gsutil mb -l europe-west1 gs://lmit-ds-3pcatchecker-dev-terraform/
-terraform init -backend-config=tf.backend ### if required, do NOT copy the existing state
-terraform plan -var-file=tf.variables
-terraform apply -var-file=tf.variables
+gcloud config set project {{PROJECT_ID}}
+gsutil mb -l europe-west1 gs://{{PROJECT_ID}}-terraform/
+gsutil lifecycle set lifecycle.json gs://{{PROJECT_ID}}-terraform/
+terraform init ### if required, do NOT copy the existing state
+terraform plan -out=.terraform/terraform.plan
+terraform apply .terraform/terraform.plan
 cd "${root_path}"

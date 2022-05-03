@@ -8,13 +8,10 @@ This is a template project to be used as a standard, for any Python project deve
 
 The template needs to be first initialised after creation using the script `bin/init_repo.sh`. 
 The script will ask the user few informations and take care of adapting configurations files accordingly. 
-Multiple Python versions (3.6+) are supported. 
-Depending on the selected Python version different requirements, CI/CD pipelines, 
-docker images, etc should be considered. The `bin/init_repo.sh` will take care of 
-setting up these files consistently.
+Multiple Python versions (3.6+) are supported.
 
 ```
-bash bin/init_repo
+bash bin/init_repo.sh
 ```
 
 **NOTE:** In the process, you will also be asked if you want to *remove the templates*, 
