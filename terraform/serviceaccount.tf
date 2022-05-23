@@ -5,7 +5,6 @@ module "datafinder_sa" {
   names         = ["datafinder"]
   generate_keys = "true"
   project_roles = ["${var.PROJECT}=>roles/bigquery.admin"]
-  display_name  = "Datafinder"
 }
 
 module "compute_engine_sa" {

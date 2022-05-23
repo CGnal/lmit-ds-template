@@ -1,5 +1,5 @@
 variable "PROJECT" {
-  default = {{PROJECT_ID}}
+  default = "{{PROJECT_ID}}"
 }
 
 variable "ZONE" {
@@ -23,7 +23,7 @@ variable "NETWORK" {
 }
 
 variable "SUBNET" {
-  default = https://www.googleapis.com/compute/v1/projects/lh-itlm/regions/europe-west1/subnetworks/lh-dedicated-{{PROJECT_ID}}
+  default = "https://www.googleapis.com/compute/v1/projects/lh-itlm/regions/europe-west1/subnetworks/lh-dedicated-{{PROJECT_ID}}"
 }
 
 variable "NODETYPE" {
@@ -47,5 +47,5 @@ variable "OS_IMAGE" {
 }
 
 variable "COMPUTESERVICEACCOUNT" {
-  default = compute-engine@{{PROJECT_ID}}.iam.gserviceaccount.com
+  default = "compute-engine@{{PROJECT_ID}}.iam.gserviceaccount.com"
 }
