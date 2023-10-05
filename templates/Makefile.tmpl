@@ -56,14 +56,14 @@ requirements/requirements.txt: requirements/requirements_ci.txt
 	@echo "==Compiling requirements.txt=="
 	cat requirements/requirements.in > subset.in
 	echo "\n-c requirements/requirements_ci.txt" >> subset.in
-	pip-compile --resolver=backtracking --output-file "requirements/requirements.txt" --quiet --no-emit-index-url subset.in
+	pip-compile --strip-extras --resolver=backtracking --output-file "requirements/requirements.txt" --quiet --no-emit-index-url subset.in
 	rm subset.in
 
 reqs: requirements/requirements.txt
 
 requirements/requirements_ci.txt: requirements/requirements_ci.in requirements/requirements.in $(pre_deps_tag)
 	@echo "==Compiling requirements_ci.txt=="
-	pip-compile --resolver=backtracking --output-file requirements/requirements_ci.txt --quiet --no-emit-index-url requirements/requirements.in requirements/requirements_ci.in
+	pip-compile --strip-extras --resolver=backtracking --output-file requirements/requirements_ci.txt --quiet --no-emit-index-url requirements/requirements.in requirements/requirements_ci.in
 
 reqs_ci: requirements/requirements_ci.txt
 
